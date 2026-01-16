@@ -10,4 +10,9 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["npm", "start"]
+# Add migration runner
+COPY runMigrations.js .
+COPY migrations/ ./migrations/
+
+# Run migrations and start server
+CMD ["sh", "-c", "node runMigrations.js && node src/server.js"]
