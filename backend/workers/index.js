@@ -1,6 +1,5 @@
 const Queue = require('bull');
 const { processPaymentJob } = require('./paymentWorker');
-const db = require('../config/database');
 
 console.log('🚀 Starting payment gateway worker...');
 
@@ -15,7 +14,7 @@ paymentQueue.process(async (job) => {
         console.log(`✅ Job ${job.id} completed successfully`);
     } catch (error) {
         console.error(`❌ Job ${job.id} failed:`, error);
-        throw error; // This will make Bull retry the job
+        throw error;
     }
 });
 

@@ -12,9 +12,11 @@ app.use(cors());
 app.use(express.json());
 
 const apiRoutes = require('./routes/api');
+const testRoutes = require('./routes/test');
 
 app.use('/', apiRoutes); // Mount at root for /health
 app.use('/api/v1', apiRoutes); // Mount for API endpoints
+app.use('/api/v1/test', testRoutes);
 
 // Placeholder for routes
 app.get('/', (req, res) => {

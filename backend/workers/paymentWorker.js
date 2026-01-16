@@ -1,6 +1,5 @@
-const db = require('../config/database');
+const db = require('../src/config/database');  // FIXED PATH
 
-// Helper function to simulate delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function processPaymentJob(jobData) {
@@ -70,8 +69,6 @@ async function processPaymentJob(jobData) {
     } else {
         console.log(`❌ Payment ${paymentId} failed`);
     }
-    
-    // TODO: In STEP 5, we'll add webhook triggering here
     
     return updatedPayment;
 }
