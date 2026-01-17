@@ -15,4 +15,4 @@ COPY runMigrations.js .
 COPY migrations/ ./migrations/
 
 # Run migrations and start server
-CMD ["sh", "-c", "node runMigrations.js && node src/server.js"]
+CMD ["sh", "-c", "node runMigrations.js && node src/app.js"]

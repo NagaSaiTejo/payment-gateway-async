@@ -205,6 +205,18 @@ const Transactions = () => {
                         <span>💳</span>
                         <span>Transactions</span>
                     </Link>
+                    <Link to="/analytics" className="nav-link">
+                        <span>📈</span>
+                        <span>Analytics</span>
+                    </Link>
+                    <Link to="/webhooks" className="nav-link">
+                        <span>🔔</span>
+                        <span>Webhooks</span>
+                    </Link>
+                    <Link to="/queue" className="nav-link">
+                        <span>📬</span>
+                        <span>Queue</span>
+                    </Link>
                     <Link to="/login" className="nav-link" onClick={() => localStorage.clear()}>
                         <span>🚪</span>
                         <span>Logout</span>

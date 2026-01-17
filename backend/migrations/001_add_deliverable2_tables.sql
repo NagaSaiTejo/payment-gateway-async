@@ -90,8 +90,10 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
 );
 
 -- Add webhook_secret to merchants (Deliverable 2)
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS webhook_url TEXT;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS webhook_secret VARCHAR(64);
-UPDATE merchants SET webhook_secret = 'whsec_test_abc123' WHERE email = 'test@example.com';
+UPDATE merchants SET webhook_secret = 'whsec_test_abc123' WHERE email = 'test@example.com' AND webhook_secret IS NULL;
+UPDATE merchants SET webhook_url = 'https://example.com/webhooks' WHERE email = 'test@example.com' AND webhook_url IS NULL;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_refunds_payment_id ON refunds(payment_id);
