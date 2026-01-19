@@ -1,4 +1,4 @@
-# 💳 Payment Gateway Pro: Async & Event-Driven 🚀
+# Payment Gateway Pro: Async & Event-Driven 🚀
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -10,17 +10,17 @@ A high-performance, production-ready payment gateway architecture simulating rea
 
 ---
 
-## ✨ Key Highlights
+## Key Highlights
 
-- **🧠 Async Processing**: Leverages Redis & BullMQ for non-blocking payment and refund handling.
-- **🔗 Secure Webhooks**: Event-driven architecture with HMAC-SHA256 signature verification and exponential backoff retries.
-- **🛡️ Idempotent APIs**: Protects against duplicate transactions using a robust idempotency key system.
-- **📦 Embeddable SDK**: A lightweight, cross-origin JS SDK for in-context payments via modals/iframes.
-- **📊 Real-time Dashboard**: Merchant-first interface for tracking transactions, configuring webhooks, and manual retries.
+- * Async Processing**: Leverages Redis & BullMQ for non-blocking payment and refund handling.
+- * Secure Webhooks**: Event-driven architecture with HMAC-SHA256 signature verification and exponential backoff retries.
+- * Idempotent APIs**: Protects against duplicate transactions using a robust idempotency key system.
+- * Embeddable SDK**: A lightweight, cross-origin JS SDK for in-context payments via modals/iframes.
+- * Real-time Dashboard**: Merchant-first interface for tracking transactions, configuring webhooks, and manual retries.
 
 ---
 
-## 📸 Visual Tour
+## Visual Tour
 
 <div align="center">
   <img src="Screenshots/Dashboard.png" width="800" alt="Dashboard">
@@ -32,7 +32,7 @@ A high-performance, production-ready payment gateway architecture simulating rea
 
 ---
 
-## 🏗️ Architecture & Flow
+## Architecture & Flow
 
 The system follows a multi-service architecture designed for reliability and decoupling.
 
@@ -64,7 +64,7 @@ sequenceDiagram
 
 ---
 
-## 🚀 Quick Start (1 Command)
+## Quick Start (1 Command)
 
 Ensure you have **Docker** and **Docker Compose** installed.
 
@@ -75,7 +75,7 @@ cd payment-gateway
 docker-compose up --build
 ```
 
-### 🛰️ Services Map
+### Services Map
 - **Merchant Dashboard**: `http://localhost:3000`
 - **Checkout Demo**: `http://localhost:3001`
 - **API Server**: `http://localhost:8000`
@@ -87,7 +87,7 @@ docker-compose up --build
 
 ---
 
-## 🛠️ Tech Stack & Design
+## Tech Stack & Design
 
 ### Backend Mastery
 - **Engine**: Node.js & Express
@@ -107,7 +107,7 @@ docker-compose up --build
 
 ---
 
-## 📈 Developer Experience (SDK)
+## Developer Experience (SDK)
 
 Integrate payments with just a few lines of code:
 
@@ -137,7 +137,7 @@ Integrate payments with just a few lines of code:
 
 ---
 
-## 🛡️ Reliability Features
+## Reliability Features
 
 ### 🔄 Webhook Retry Schedule
 If your server is down, we don't give up. The system uses a smart retry logic:
@@ -149,7 +149,7 @@ If your server is down, we don't give up. The system uses a smart retry logic:
 | 4 | 30 Minutes |
 | 5 | 2 Hours |
 
-### 🔑 Verify Webhook Signature (Node.js)
+### Verify Webhook Signature (Node.js)
 ```javascript
 const crypto = require('crypto');
 
@@ -166,7 +166,7 @@ const isValid = verify(req.body, req.headers['x-webhook-signature'], 'whsec_test
 
 ---
 
-## 🛣️ Roadmap
+## Roadmap
 - [ ] **Subscription Engine**: Recurring billing support.
 - [ ] **Multi-currency**: Dynamic currency conversion.
 - [ ] **Fraud Detection**: AI-powered risk assessment.
@@ -174,8 +174,5 @@ const isValid = verify(req.body, req.headers['x-webhook-signature'], 'whsec_test
 
 ---
 
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-Built by [Naga Sai Tejo](https://github.com/NagaSaiTejo)
+## License
+  Built by [Naga Sai Tejo](https://github.com/NagaSaiTejo)
