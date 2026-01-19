@@ -1,213 +1,181 @@
-# Payment Gateway – Multi-Method Processing & Hosted Checkout
+# 💳 Payment Gateway Pro: Async & Event-Driven 🚀
 
-  This project is a full-stack Payment Gateway system built to simulate how platforms like Razorpay, Stripe, or PayPal work internally.
-  It supports merchant authentication, order creation, UPI & card payments, a hosted checkout page, and a merchant dashboard — all running in Docker.
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-  The system is designed for fintech-grade workflows, including payment state machines, validation logic, and transaction persistence.
+A high-performance, production-ready payment gateway architecture simulating real-world patterns used by **Stripe**, **Razorpay**, and **PayPal**. This system is built for scale, featuring asynchronous job processing, secure event-driven webhooks, and a seamless developer experience with an embeddable SDK.
 
-# What This Project Includes
- ## Merchant System
+---
 
-  A pre-seeded test merchant is created on startup:
+## ✨ Key Highlights
 
-  Email: test@example.com
-  API Key: key_test_abc123
-  API Secret: secret_test_xyz789
+- **🧠 Async Processing**: Leverages Redis & BullMQ for non-blocking payment and refund handling.
+- **🔗 Secure Webhooks**: Event-driven architecture with HMAC-SHA256 signature verification and exponential backoff retries.
+- **🛡️ Idempotent APIs**: Protects against duplicate transactions using a robust idempotency key system.
+- **📦 Embeddable SDK**: A lightweight, cross-origin JS SDK for in-context payments via modals/iframes.
+- **📊 Real-time Dashboard**: Merchant-first interface for tracking transactions, configuring webhooks, and manual retries.
 
+---
 
-Merchants can:
+## 📸 Visual Tour
 
-  View their API keys
-  Track payments
-  See total volume & success rate
+<div align="center">
+  <img src="Screenshots/Dashboard.png" width="800" alt="Dashboard">
+  <p><i>Premium Merchant Dashboard with Real-time Analytics</i></p>
+  <br>
+  <img src="Screenshots/CheckOut_Initiated.png" width="400" alt="Checkout">
+  <p><i>Modern, Responsive Checkout Flow</i></p>
+</div>
 
-## Orders API
+---
 
-  Merchants can create payment orders through authenticated REST APIs.
+## 🏗️ Architecture & Flow
 
-  Example:
+The system follows a multi-service architecture designed for reliability and decoupling.
 
-  POST /api/v1/orders
-  {
-    "amount": 50000,
-    "currency": "INR",
-    "receipt": "order_001"
-  }
+```mermaid
+sequenceDiagram
+    participant Merchant
+    participant MerchantServer as Merchant Server
+    participant GatewayAPI as Gateway API
+    participant JobQueue as Redis Queue (BullMQ)
+    participant Worker as Background Worker
+    participant WebhookSvc as Webhook Service
 
+    Merchant->>GatewayAPI: Initiate Payment (SDK)
+    GatewayAPI-->>Merchant: Return Pending Status
+    GatewayAPI->>JobQueue: Enqueue Payment Job
+    
+    Note over Worker: Decoupled Processing
+    
+    JobQueue->>Worker: Pick up Job
+    Worker->>Worker: Process Payment (5-10s)
+    Worker->>GatewayAPI: Update Status (Success/Fail)
+    
+    Note over WebhookSvc: Event Delivery
+    
+    GatewayAPI->>WebhookSvc: Trigger Webhook Event
+    WebhookSvc->>MerchantServer: Secure Post (HMAC Signed)
+    MerchantServer-->>WebhookSvc: 200 OK
+```
 
-  Orders are stored with IDs like:
+---
 
-  order_c80UYgluKJPPkARY => which was my last testing order id.
+## 🚀 Quick Start (1 Command)
 
-## Payment Engine
+Ensure you have **Docker** and **Docker Compose** installed.
 
-  Payments support:
-  UPI (user@bank)
-  Cards (Luhn validated, network detected)
-  Features:
-  Realistic 5–10 second processing delay
-  Randomized success/failure (UPI 90%, Card 95%)
-  State machine:
-  processing → success / failed
-  No CVV or full card numbers are stored (only last 4 digits)
+```bash
+# Clone & Start
+git clone https://github.com/NagaSaiTejo/payment-gateway
+cd payment-gateway
+docker-compose up --build
+```
 
-## Hosted Checkout Page
+### 🛰️ Services Map
+- **Merchant Dashboard**: `http://localhost:3000`
+- **Checkout Demo**: `http://localhost:3001`
+- **API Server**: `http://localhost:8000`
+- **Default Merchant Credentials**:
+  - **Email**: `test@example.com`
+  - **API Key**: `key_test_abc123`
+  - **API Secret**: `secret_test_xyz789`
+  - **Webhook Secret**: `whsec_test_abc123`
 
-  Customers are redirected to:
+---
 
-  http://localhost:3001/checkout?order_id=ORDER_ID
+## 🛠️ Tech Stack & Design
 
+### Backend Mastery
+- **Engine**: Node.js & Express
+- **Queue**: BullMQ (Powered by Redis)
+- **DB**: PostgreSQL (Relational schema with ACID compliance)
+- **Auth**: JWT & API Key based authentication
 
-  It includes:
-  Order summary
-  UPI & Card selection
-  Processing animation
-  Success / Failure screens
-  Payment ID display
+### Frontend Excellence
+- **Stacks**: React + Vite
+- **SDK**: Vanilla JS (Lightweight & Cross-origin aware)
+- **Styling**: Premium CSS with smooth transitions and glassmorphism.
 
-## Merchant Dashboard
+### Security First
+- **HMAC-SHA256**: For verifying webhook authenticity.
+- **Idempotency**: `Idempotency-Key` header support to prevent double billing.
+- **Retries**: 5-step exponential backoff (1m, 5m, 30m, 2h, 24h).
 
-  Available at:
-  http://localhost:3000
+---
 
+## 📈 Developer Experience (SDK)
 
-  Shows:
+Integrate payments with just a few lines of code:
 
-  API Key & Secret
-  Total transactions
-  Total amount processed
-  Success rate
-  Full transaction history
+```html
+<!-- Load SDK -->
+<script src="http://localhost:3001/checkout.js"></script>
 
-## Run with Docker (One Command)
-  1️⃣ Clone the project
-  git clone https://github.com/NagaSaiTejo/payment-gateway
-  cd payment-gateway
+<script>
+  const checkout = new PaymentGateway({
+    key: 'key_test_abc123',
+    orderId: 'ORDER_12345',
+    onSuccess: (res) => {
+      console.log('Payment Successful!', res.paymentId);
+    },
+    onFailure: (err) => {
+      console.error('Payment Failed:', err);
+    },
+    onClose: () => {
+       console.log('Modal Closed');
+    }
+  });
+  
+  // Open the hosted checkout modal
+  checkout.open();
+</script>
+```
 
-  2️⃣ Start everything
-  docker-compose up --build
+---
 
-  This starts:
-  PostgreSQL
-  API Server (port 8000)
-  Merchant Dashboard (port 3000)
-  Checkout Page (port 3001)
+## 🛡️ Reliability Features
 
-  When ready you’ll see:
-  Server running on port 8000
+### 🔄 Webhook Retry Schedule
+If your server is down, we don't give up. The system uses a smart retry logic:
+| Attempt | Delay |
+| :--- | :--- |
+| 1 | Immediate |
+| 2 | 1 Minute |
+| 3 | 5 Minutes |
+| 4 | 30 Minutes |
+| 5 | 2 Hours |
 
-## How to Test
-  Step 1 – Login
+### 🔑 Verify Webhook Signature (Node.js)
+```javascript
+const crypto = require('crypto');
 
-  Go to:
+function verify(payload, signature, secret) {
+  const expected = crypto.createHmac('sha256', secret)
+                       .update(JSON.stringify(payload))
+                       .digest('hex');
+  return signature === expected;
+}
 
-  http://localhost:3000
+// In your route handler:
+const isValid = verify(req.body, req.headers['x-webhook-signature'], 'whsec_test_abc123');
+```
 
+---
 
-  Login with:
+## 🛣️ Roadmap
+- [ ] **Subscription Engine**: Recurring billing support.
+- [ ] **Multi-currency**: Dynamic currency conversion.
+- [ ] **Fraud Detection**: AI-powered risk assessment.
+- [ ] **GraphQL API**: For more flexible data fetching.
 
-  Email: test@example.com
-  Password: anything
+---
 
-  Step 2 – Create Order
-  curl -X POST http://localhost:8000/api/v1/orders \
-    -H "Content-Type: application/json" \
-    -H "X-Api-Key: key_test_abc123" \
-    -H "X-Api-Secret: secret_test_xyz789" \
-    -d '{
-      "amount": 50000,
-      "currency": "INR",
-      "receipt": "demo_001"
-    }'
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.
 
-
-  You’ll receive:
-
-  {
-    "id": "order_c8OUYgLuKJPPkARY",
-    ...
-  }
-
-  Step 3 – Pay via Checkout
-
-  Open:
-
-  http://localhost:3001/checkout?order_id=order_c80UYgluKJPPkARY
-
-
-  Try:
-
-  UPI → user@paytm
-
-  Card → 4242424242424242
-
-  You’ll see:
-
-  Payment Successful
-  pay_xxxxxxxxxxxxxxxx
-## Database Schema
-  Merchants
-  Column	Type
-  id	UUID
-  name	VARCHAR
-  email	VARCHAR
-  api_key	VARCHAR
-  api_secret	VARCHAR
-  is_active	BOOLEAN
-  Orders
-  Column	Type
-  id	VARCHAR (order_ + 16 chars)
-  merchant_id	UUID
-  amount	INTEGER
-  currency	VARCHAR
-  receipt	VARCHAR
-  status	VARCHAR
-  created_at	TIMESTAMP
-  Payments
-  Column	Type
-  id	VARCHAR (pay_ + 16 chars)
-  order_id	VARCHAR
-  merchant_id	UUID
-  method	VARCHAR (upi / card)
-  status	VARCHAR (processing / success / failed)
-  vpa	VARCHAR
-  card_network	VARCHAR
-  card_last4	VARCHAR
-## API Endpoints
-  Method	Endpoint	Description	Auth
-  GET	/health	System status	No
-  POST	/api/v1/orders	Create order	Yes
-  GET	/api/v1/orders/:id	Fetch order	Yes
-  POST	/api/v1/payments	Create payment	Yes
-  GET	/api/v1/payments/:id	Payment status	Yes
-  🧪 Test Mode (For Evaluation)
-
-  Controlled via .env:
-
-  TEST_MODE=true
-  TEST_PAYMENT_SUCCESS=true
-  TEST_PROCESSING_DELAY=1000
-
-
-  This ensures:
-  Deterministic payment result
-  Fixed delay
-  Suitable for automated evaluation
-
-## Tech Stack
-
-  Backend – Node.js, Express
-  Database – PostgreSQL
-  Frontend – React + Vite
-  DevOps – Docker & Docker Compose
-  Security – API Key + Secret authentication
-  Validation – Luhn Algorithm, VPA Regex, Card Network Detection
-
-## Final Result
-
-  This project delivers:
-  A real payment gateway architecture
-  Secure merchant authentication
-  Order → Payment lifecycle
-  Full Dockerized fintech stack
-  Professional checkout & dashboard
+---
+Built by [Naga Sai Tejo](https://github.com/NagaSaiTejo)
