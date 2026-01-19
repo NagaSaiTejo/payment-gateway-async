@@ -3,9 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
-import Analytics from './pages/Analytics';
 import Webhooks from './pages/Webhooks';
-import Queue from './pages/Queue';
+import Docs from './pages/Docs';
 
 function App() {
   return (
@@ -14,10 +13,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/transactions" element={<Transactions />} />
+        <Route path="/dashboard/webhooks" element={<Webhooks />} />
+        <Route path="/dashboard/docs" element={<Docs />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/webhooks" element={<Webhooks />} />
-        <Route path="/queue" element={<Queue />} />
       </Routes>
     </Router>
   );

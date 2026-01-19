@@ -43,22 +43,34 @@ const Transactions = () => {
     const getStatusBadge = (status) => {
         const icons = {
             success: '✅',
-            processing: '⏳',
-            failed: '❌'
+            pending: '⌛',
+            failed: '❌',
+            refunded: '↩️'
         };
-        
+
         const classes = {
             success: 'badge badge-success',
-            processing: 'badge badge-processing',
-            failed: 'badge badge-failed'
+            pending: 'badge badge-processing',
+            failed: 'badge badge-failed',
+            refunded: 'badge badge-secondary'
         };
-        
+
         return (
-            <span className={classes[status] || 'badge'}>
+            <span className={classes[status] || 'badge'} style={{
+                padding: '0.4rem 0.8rem',
+                borderRadius: '20px',
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                textTransform: 'capitalize'
+            }}>
                 {icons[status] || '📊'} {status}
             </span>
         );
     };
+
 
     const getMethodIcon = (method) => {
         const icons = {
@@ -118,24 +130,24 @@ const Transactions = () => {
 
     const getFilteredPayments = () => {
         let filtered = getSortedPayments();
-        
+
         if (filters.status !== 'all') {
             filtered = filtered.filter(p => p.status === filters.status);
         }
-        
+
         if (filters.method !== 'all') {
             filtered = filtered.filter(p => p.method === filters.method);
         }
-        
+
         if (filters.search) {
             const searchLower = filters.search.toLowerCase();
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.id.toLowerCase().includes(searchLower) ||
                 p.order_id.toLowerCase().includes(searchLower) ||
                 p.method.toLowerCase().includes(searchLower)
             );
         }
-        
+
         return filtered;
     };
 
@@ -166,7 +178,7 @@ const Transactions = () => {
         const filtered = getFilteredPayments();
         const totalAmount = filtered.reduce((sum, p) => sum + p.amount, 0);
         const successCount = filtered.filter(p => p.status === 'success').length;
-        
+
         return {
             total: filtered.length,
             amount: totalAmount,
@@ -205,24 +217,20 @@ const Transactions = () => {
                         <span>💳</span>
                         <span>Transactions</span>
                     </Link>
-                    <Link to="/analytics" className="nav-link">
-                        <span>📈</span>
-                        <span>Analytics</span>
-                    </Link>
-                    <Link to="/webhooks" className="nav-link">
-                        <span>🔔</span>
+                    <Link to="/dashboard/webhooks" className="nav-link">
+                        <span>🔗</span>
                         <span>Webhooks</span>
                     </Link>
-                    <Link to="/queue" className="nav-link">
-                        <span>📬</span>
-                        <span>Queue</span>
+                    <Link to="/dashboard/docs" className="nav-link">
+                        <span>📖</span>
+                        <span>Docs</span>
                     </Link>
                     <Link to="/login" className="nav-link" onClick={() => localStorage.clear()}>
                         <span>🚪</span>
                         <span>Logout</span>
                     </Link>
                 </nav>
-                
+
                 <div style={{
                     marginTop: 'auto',
                     padding: '1.5rem',
@@ -248,8 +256,8 @@ const Transactions = () => {
                             View and manage all your payment transactions
                         </p>
                     </div>
-                    
-                    <button 
+
+                    <button
                         className="btn btn-primary"
                         onClick={exportToCSV}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -269,7 +277,7 @@ const Transactions = () => {
                             {stats.total.toLocaleString()}
                         </div>
                     </div>
-                    
+
                     <div className="stat-card">
                         <div className="stat-label">
                             <span>💰</span>
@@ -279,7 +287,7 @@ const Transactions = () => {
                             {formatCurrency(stats.amount)}
                         </div>
                     </div>
-                    
+
                     <div className="stat-card">
                         <div className="stat-label">
                             <span>✅</span>
@@ -315,7 +323,7 @@ const Transactions = () => {
                                     className="form-input"
                                     style={{ width: '150px', padding: '0.5rem' }}
                                     value={filters.status}
-                                    onChange={(e) => setFilters({...filters, status: e.target.value})}
+                                    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                                 >
                                     <option value="all">All Status</option>
                                     <option value="success">Success</option>
@@ -323,7 +331,7 @@ const Transactions = () => {
                                     <option value="failed">Failed</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label style={{
                                     display: 'block',
@@ -338,14 +346,14 @@ const Transactions = () => {
                                     className="form-input"
                                     style={{ width: '150px', padding: '0.5rem' }}
                                     value={filters.method}
-                                    onChange={(e) => setFilters({...filters, method: e.target.value})}
+                                    onChange={(e) => setFilters({ ...filters, method: e.target.value })}
                                 >
                                     <option value="all">All Methods</option>
                                     <option value="upi">UPI</option>
                                     <option value="card">Card</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label style={{
                                     display: 'block',
@@ -362,13 +370,13 @@ const Transactions = () => {
                                     type="text"
                                     placeholder="Search ID or Order..."
                                     value={filters.search}
-                                    onChange={(e) => setFilters({...filters, search: e.target.value})}
+                                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                                 />
                             </div>
                         </div>
-                        
+
                         <div>
-                            <button 
+                            <button
                                 className="btn"
                                 onClick={() => {
                                     setFilters({
@@ -392,15 +400,15 @@ const Transactions = () => {
                     </div>
 
                     {loading ? (
-                        <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            alignItems: 'center', 
-                            height: '300px' 
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '300px'
                         }}>
-                            <div className="loading" style={{ 
-                                fontSize: '1.5rem', 
-                                color: 'var(--primary)' 
+                            <div className="loading" style={{
+                                fontSize: '1.5rem',
+                                color: 'var(--primary)'
                             }}>
                                 Loading transactions...
                             </div>
@@ -440,15 +448,16 @@ const Transactions = () => {
                                                 <span>{sortConfig.direction === 'ascending' ? '↑' : '↓'}</span>
                                             )}
                                         </th>
+                                        <th>ACTIONS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredPayments.map(payment => {
                                         const { date, time } = formatDate(payment.created_at);
                                         return (
-                                            <tr 
-                                                key={payment.id} 
-                                                data-test-id="transaction-row" 
+                                            <tr
+                                                key={payment.id}
+                                                data-test-id="transaction-row"
                                                 data-payment-id={payment.id}
                                                 style={{ transition: 'all 0.2s ease' }}
                                             >
@@ -457,8 +466,8 @@ const Transactions = () => {
                                                         <span style={{ fontSize: '0.875rem' }}>
                                                             {getMethodIcon(payment.method)}
                                                         </span>
-                                                        <code style={{ 
-                                                            color: 'var(--primary)', 
+                                                        <code style={{
+                                                            color: 'var(--primary)',
                                                             fontWeight: 600,
                                                             fontSize: '0.75rem',
                                                             background: 'rgba(99, 102, 241, 0.05)',
@@ -471,7 +480,7 @@ const Transactions = () => {
                                                     </div>
                                                 </td>
                                                 <td data-test-id="order-id">
-                                                    <code style={{ 
+                                                    <code style={{
                                                         color: 'var(--text-muted)',
                                                         fontSize: '0.75rem',
                                                         background: 'var(--background)',
@@ -486,9 +495,9 @@ const Transactions = () => {
                                                     {formatCurrency(payment.amount)}
                                                 </td>
                                                 <td data-test-id="method" style={{ textTransform: 'uppercase' }}>
-                                                    <div style={{ 
-                                                        display: 'flex', 
-                                                        alignItems: 'center', 
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
                                                         gap: '0.5rem',
                                                         fontWeight: '600'
                                                     }}>
@@ -504,8 +513,8 @@ const Transactions = () => {
                                                         <div style={{ fontWeight: '600', fontSize: '0.875rem' }}>
                                                             {date}
                                                         </div>
-                                                        <div style={{ 
-                                                            color: 'var(--text-muted)', 
+                                                        <div style={{
+                                                            color: 'var(--text-muted)',
                                                             fontSize: '0.75rem',
                                                             marginTop: '0.25rem'
                                                         }}>
@@ -513,12 +522,36 @@ const Transactions = () => {
                                                         </div>
                                                     </div>
                                                 </td>
+                                                <td>
+                                                    {payment.status === 'success' && (
+                                                        <button
+                                                            className="btn btn-secondary btn-sm"
+                                                            data-test-id="refund-button"
+                                                            data-payment-id={payment.id}
+                                                            onClick={async () => {
+                                                                const reason = prompt('Reason for refund:');
+                                                                if (!reason) return;
+                                                                try {
+                                                                    const { apiKey, apiSecret } = JSON.parse(localStorage.getItem('merchant'));
+                                                                    await axios.post(`http://localhost:8000/api/v1/payments/${payment.id}/refunds`,
+                                                                        { amount: payment.amount, reason },
+                                                                        { headers: { 'X-Api-Key': apiKey, 'X-Api-Secret': apiSecret } }
+                                                                    );
+                                                                    alert('Refund initiated!');
+                                                                    fetchPayments();
+                                                                } catch (err) { alert('Refund failed'); }
+                                                            }}
+                                                        >
+                                                            Refund
+                                                        </button>
+                                                    )}
+                                                </td>
                                             </tr>
                                         );
                                     })}
                                 </tbody>
                             </table>
-                            
+
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -541,16 +574,16 @@ const Transactions = () => {
                             </div>
                         </div>
                     ) : (
-                        <div style={{ 
-                            textAlign: 'center', 
+                        <div style={{
+                            textAlign: 'center',
                             padding: '3rem',
                             color: 'var(--text-muted)'
                         }}>
                             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
                             <h3 style={{ marginBottom: '0.5rem' }}>No transactions found</h3>
                             <p style={{ fontSize: '0.875rem' }}>
-                                {payments.length === 0 
-                                    ? "You haven't processed any payments yet." 
+                                {payments.length === 0
+                                    ? "You haven't processed any payments yet."
                                     : "No transactions match your current filters."}
                             </p>
                             {payments.length === 0 ? (
@@ -558,8 +591,8 @@ const Transactions = () => {
                                     Go to Dashboard
                                 </Link>
                             ) : (
-                                <button 
-                                    className="btn btn-primary" 
+                                <button
+                                    className="btn btn-primary"
                                     style={{ marginTop: '1rem' }}
                                     onClick={() => setFilters({
                                         status: 'all',
@@ -574,9 +607,9 @@ const Transactions = () => {
                     )}
                 </div>
 
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                     gap: '1.5rem',
                     marginTop: '1.5rem'
                 }}>
@@ -584,15 +617,15 @@ const Transactions = () => {
                         <h4 style={{ marginBottom: '1rem' }}>Transaction Insights</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <div style={{ 
-                                    fontSize: '0.75rem', 
+                                <div style={{
+                                    fontSize: '0.75rem',
                                     color: 'var(--text-muted)',
                                     marginBottom: '0.25rem'
                                 }}>
                                     Most Common Method
                                 </div>
-                                <div style={{ 
-                                    fontSize: '1rem', 
+                                <div style={{
+                                    fontSize: '1rem',
                                     fontWeight: '600',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -606,26 +639,26 @@ const Transactions = () => {
                                 </div>
                             </div>
                             <div>
-                                <div style={{ 
-                                    fontSize: '0.75rem', 
+                                <div style={{
+                                    fontSize: '0.75rem',
                                     color: 'var(--text-muted)',
                                     marginBottom: '0.25rem'
                                 }}>
                                     Average Transaction
                                 </div>
                                 <div style={{ fontSize: '1rem', fontWeight: '600' }}>
-                                    {payments.length > 0 
+                                    {payments.length > 0
                                         ? formatCurrency(payments.reduce((sum, p) => sum + p.amount, 0) / payments.length)
                                         : '₹0'}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="card">
                         <h4 style={{ marginBottom: '1rem' }}>Quick Actions</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <button 
+                            <button
                                 className="btn"
                                 style={{
                                     background: 'rgba(16, 185, 129, 0.1)',
@@ -636,7 +669,7 @@ const Transactions = () => {
                             >
                                 📥 Download Report
                             </button>
-                            <button 
+                            <button
                                 className="btn"
                                 style={{
                                     background: 'rgba(99, 102, 241, 0.1)',
@@ -647,8 +680,8 @@ const Transactions = () => {
                             >
                                 🔄 Refresh Data
                             </button>
-                            <Link 
-                                to="/dashboard" 
+                            <Link
+                                to="/dashboard"
                                 className="btn"
                                 style={{
                                     background: 'rgba(139, 92, 246, 0.1)',

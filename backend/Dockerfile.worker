@@ -1,15 +1,11 @@
-# Dockerfile.worker
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (not just production)
-RUN npm install  # instead of npm ci --only=production
+RUN npm install
 
-# Copy source code
 COPY . .
 
-CMD ["node", "workers/index.js"]
+CMD ["node", "src/workers/index.js"]

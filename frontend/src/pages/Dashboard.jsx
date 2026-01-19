@@ -130,17 +130,13 @@ const Dashboard = () => {
                         <span>💳</span>
                         <span>Transactions</span>
                     </Link>
-                    <Link to="/analytics" className="nav-link">
-                        <span>📈</span>
-                        <span>Analytics</span>
-                    </Link>
-                    <Link to="/webhooks" className="nav-link">
-                        <span>🔔</span>
+                    <Link to="/dashboard/webhooks" className="nav-link">
+                        <span>🔗</span>
                         <span>Webhooks</span>
                     </Link>
-                    <Link to="/queue" className="nav-link">
-                        <span>📬</span>
-                        <span>Queue</span>
+                    <Link to="/dashboard/docs" className="nav-link">
+                        <span>📖</span>
+                        <span>Docs</span>
                     </Link>
                     <Link to="/login" className="nav-link" onClick={() => localStorage.clear()}>
                         <span>🚪</span>
@@ -402,9 +398,18 @@ const Dashboard = () => {
                                     <span>Payment Processing</span>
                                     <span className="badge badge-success">Active</span>
                                 </div>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <span>Background Workers</span>
+                                    <span className="badge badge-success">Running</span>
+                                </div>
                             </div>
                         </div>
                     </>
+
                 )}
             </main>
         </div>

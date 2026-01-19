@@ -49,6 +49,14 @@ const Checkout = () => {
         }
     };
 
+    const isEmbedded = searchParams.get('embedded') === 'true';
+
+    const sendMessageToParent = (type, data) => {
+        if (isEmbedded && window.parent) {
+            window.parent.postMessage({ type, data }, '*');
+        }
+    };
+
     const handlePayment = async (e) => {
         e.preventDefault();
         setPaymentState('processing');
@@ -78,6 +86,7 @@ const Checkout = () => {
             pollStatus(paymentId);
         } catch (err) {
             setPaymentState('error');
+            sendMessageToParent('payment_failed', { error: 'Request failed' });
         }
     };
 
@@ -91,13 +100,16 @@ const Checkout = () => {
                     clearInterval(interval);
                     setPaymentResult(res.data);
                     setPaymentState('success');
+                    sendMessageToParent('payment_success', { paymentId });
                 } else if (status === 'failed') {
                     clearInterval(interval);
                     setPaymentState('error');
+                    sendMessageToParent('payment_failed', { paymentId, status: 'failed' });
                 }
             } catch (err) {
                 clearInterval(interval);
                 setPaymentState('error');
+                sendMessageToParent('payment_failed', { error: 'Polling failed' });
             }
         }, 2000);
     };
@@ -146,8 +158,8 @@ const Checkout = () => {
                     <div className="error-icon">❌</div>
                     <h3>Order Not Found</h3>
                     <p className="text-muted">The order ID provided is invalid or expired.</p>
-                    <button 
-                        className="btn-secondary" 
+                    <button
+                        className="btn-secondary"
                         onClick={() => window.location.reload()}
                     >
                         Retry
@@ -193,7 +205,7 @@ const Checkout = () => {
                     <p className="text-muted" data-test-id="success-message">
                         Your payment was processed successfully
                     </p>
-                    
+
                     <div className="transaction-details">
                         <div className="detail-row">
                             <span className="detail-label">Transaction ID</span>
@@ -216,12 +228,15 @@ const Checkout = () => {
                             </span>
                         </div>
                     </div>
-                    
+
                     <div className="action-buttons">
                         <button className="btn-primary" onClick={() => window.print()}>
                             <span>🖨️</span> Print Receipt
                         </button>
-                        <button className="btn-secondary" onClick={() => window.close()}>
+                        <button className="btn-secondary" onClick={() => {
+                            sendMessageToParent('close_modal');
+                            window.close();
+                        }}>
                             <span>←</span> Close Window
                         </button>
                     </div>
@@ -241,7 +256,7 @@ const Checkout = () => {
                     <p className="text-muted" data-test-id="error-message">
                         We couldn't process your payment. Please try again.
                     </p>
-                    
+
                     <div className="troubleshoot-tips">
                         <h4>📝 Troubleshooting Tips:</h4>
                         <ul>
@@ -251,10 +266,10 @@ const Checkout = () => {
                             <li>Contact your bank if issue persists</li>
                         </ul>
                     </div>
-                    
-                    <button 
-                        className="btn-primary" 
-                        data-test-id="retry-button" 
+
+                    <button
+                        className="btn-primary"
+                        data-test-id="retry-button"
                         onClick={() => setPaymentState('initial')}
                     >
                         <span>🔄</span> Try Again
@@ -297,7 +312,7 @@ const Checkout = () => {
                         <h3>Order Summary</h3>
                         <span className="order-status">Payment Pending</span>
                     </div>
-                    
+
                     <div className="summary-details">
                         <div className="amount-display-main">
                             <span className="currency">₹</span>
@@ -305,7 +320,7 @@ const Checkout = () => {
                                 {(order.amount / 100).toLocaleString()}
                             </span>
                         </div>
-                        
+
                         <div className="detail-items">
                             <div className="detail-item">
                                 <span className="item-label">Order ID</span>
@@ -322,9 +337,9 @@ const Checkout = () => {
                     <div className="methods-header">
                         <h3>Select Payment Method</h3>
                     </div>
-                    
+
                     <div className="method-cards">
-                        <div 
+                        <div
                             className={`method-card ${paymentMethod === 'upi' ? 'active' : ''}`}
                             onClick={() => setPaymentMethod('upi')}
                             data-test-id="method-upi"
@@ -340,8 +355,8 @@ const Checkout = () => {
                                 <div className={`radio-dot ${paymentMethod === 'upi' ? 'active' : ''}`}></div>
                             </div>
                         </div>
-                        
-                        <div 
+
+                        <div
                             className={`method-card ${paymentMethod === 'card' ? 'active' : ''}`}
                             onClick={() => setPaymentMethod('card')}
                             data-test-id="method-card"
@@ -383,7 +398,7 @@ const Checkout = () => {
                                     <p className="input-hint">Enter your UPI ID (e.g., username@bank)</p>
                                 </div>
                             </div>
-                            
+
                             <button className="btn-pay" data-test-id="pay-button" type="submit">
                                 <span>💳</span>
                                 Pay ₹{(order.amount / 100).toLocaleString()}
@@ -395,7 +410,7 @@ const Checkout = () => {
                         <form onSubmit={handlePayment} data-test-id="card-form">
                             <div className="form-section">
                                 <h4>Enter Card Details</h4>
-                                
+
                                 <div className="input-group">
                                     <label className="input-label">Card Number</label>
                                     <div className="input-wrapper">
@@ -406,14 +421,14 @@ const Checkout = () => {
                                             type="text"
                                             placeholder="1234 5678 9012 3456"
                                             value={formatCardNumber(cardDetails.number)}
-                                            onChange={e => setCardDetails({...cardDetails, number: e.target.value})}
+                                            onChange={e => setCardDetails({ ...cardDetails, number: e.target.value })}
                                             maxLength={19}
                                             required
                                         />
                                         <span className="card-type"></span>
                                     </div>
                                 </div>
-                                
+
                                 <div className="row-inputs">
                                     <div className="input-group">
                                         <label className="input-label">Expiry Date</label>
@@ -423,12 +438,12 @@ const Checkout = () => {
                                             type="text"
                                             placeholder="MM/YY"
                                             value={formatExpiry(cardDetails.expiry)}
-                                            onChange={e => setCardDetails({...cardDetails, expiry: e.target.value})}
+                                            onChange={e => setCardDetails({ ...cardDetails, expiry: e.target.value })}
                                             maxLength={5}
                                             required
                                         />
                                     </div>
-                                    
+
                                     <div className="input-group">
                                         <label className="input-label">CVV</label>
                                         <div className="input-wrapper">
@@ -438,7 +453,7 @@ const Checkout = () => {
                                                 type="password"
                                                 placeholder="123"
                                                 value={cardDetails.cvv}
-                                                onChange={e => setCardDetails({...cardDetails, cvv: e.target.value})}
+                                                onChange={e => setCardDetails({ ...cardDetails, cvv: e.target.value })}
                                                 maxLength={4}
                                                 required
                                             />
@@ -446,7 +461,7 @@ const Checkout = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="input-group">
                                     <label className="input-label">Cardholder Name</label>
                                     <input
@@ -455,13 +470,13 @@ const Checkout = () => {
                                         type="text"
                                         placeholder="John Doe"
                                         value={cardDetails.name}
-                                        onChange={e => setCardDetails({...cardDetails, name: e.target.value})}
+                                        onChange={e => setCardDetails({ ...cardDetails, name: e.target.value })}
                                         required
                                     />
                                 </div>
                             </div>
-                            
-                            
+
+
                             <button className="btn-pay" data-test-id="pay-button" type="submit">
                                 <span>💳</span>
                                 Pay ₹{(order.amount / 100).toLocaleString()}
